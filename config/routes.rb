@@ -12,10 +12,10 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root "reports#index"
 
-  resources :reports, only: [:index, :show] do
-    resources :runs, only: [:index, :show], controller: 'report_runs', param: :ordinal do
+  resources :reports, only: [ :index, :show ] do
+    resources :runs, only: [ :index, :show ], controller: "report_runs", param: :ordinal do
       member do
-        get 'raw'
+        get "raw"
       end
     end
   end

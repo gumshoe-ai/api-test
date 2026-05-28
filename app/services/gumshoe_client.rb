@@ -1,9 +1,9 @@
-require 'httparty'
+require "httparty"
 
 class GumshoeClient
   include HTTParty
   include GumshoeApiUrls
-  
+
   def initialize(api_key)
     @api_key = api_key
     @curl_command = nil
@@ -11,14 +11,14 @@ class GumshoeClient
     self.class.base_uri @base_uri
     @options = {
       headers: {
-        'Authorization' => "Bearer #{api_key}",
-        'Content-Type' => 'application/json'
+        "Authorization" => "Bearer #{api_key}",
+        "Content-Type" => "application/json"
       }
     }
   end
-  
+
   attr_reader :curl_command
-  
+
   def reports(query = {})
     url = reports_url
     log_request(url, query)
@@ -26,7 +26,7 @@ class GumshoeClient
     log_response(response, url)
     response
   end
-  
+
   def report(id)
     url = report_url(id)
     log_request(url)
@@ -34,7 +34,7 @@ class GumshoeClient
     log_response(response, url)
     response
   end
-  
+
   def report_runs(report_id, query = {})
     url = report_runs_url(report_id)
     log_request(url, query)
@@ -42,7 +42,7 @@ class GumshoeClient
     log_response(response, url)
     response
   end
-  
+
   def report_run(report_id, ordinal)
     url = report_run_url(report_id, ordinal)
     log_request(url)
@@ -50,7 +50,7 @@ class GumshoeClient
     log_response(response, url)
     response
   end
-  
+
   def report_run_raw(report_id, ordinal)
     url = report_run_raw_url(report_id, ordinal)
     log_request(url)
@@ -58,9 +58,9 @@ class GumshoeClient
     log_response(response, url)
     response
   end
-  
+
   private
-  
+
   def request_options(query = {})
     cleaned_query = query.reject { |_key, value| value.blank? }
     cleaned_query.any? ? @options.merge(query: cleaned_query) : @options
@@ -69,7 +69,7 @@ class GumshoeClient
   def log_request(url, query = {})
     @curl_command = GumshoeApiUrls.curl_command(url, query)
   end
-  
+
   def log_response(response, url)
     # Only log errors
     if response.code >= 400
