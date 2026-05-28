@@ -45,11 +45,12 @@ class ReportRunsController < ApplicationController
       @curl_command = curl_command(report_runs_url(@report_id))
       
       client = GumshoeClient.new(api_key)
-      response = client.report_runs(@report_id)
+      response = client.report_runs(@report_id, gumshoe_pagination_params)
       @curl_command = client.curl_command
       
       if response.success?
         parsed = response.parsed_response
+        set_gumshoe_pagination(parsed)
         # Handle nested structure: {"data": [...]}, {"runs": [...]} or direct array
         @report_runs = if parsed.is_a?(Hash) && parsed['data']
           parsed['data']
@@ -113,7 +114,7 @@ class ReportRunsController < ApplicationController
       
       if response.success?
         @raw_data = response.body
-        render plain: @raw_data, content_type: 'text/plain'
+        render plain: @raw_data, content_type: 'application/json'
       else
         @error = "Failed to fetch raw report run: HTTP #{response.code} - #{response.message}"
         Rails.logger.error @error

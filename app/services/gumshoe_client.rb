@@ -19,10 +19,10 @@ class GumshoeClient
   
   attr_reader :curl_command
   
-  def reports
+  def reports(query = {})
     url = reports_url
-    log_request(url)
-    response = self.class.get(url, @options)
+    log_request(url, query)
+    response = self.class.get(url, request_options(query))
     log_response(response, url)
     response
   end
@@ -35,10 +35,10 @@ class GumshoeClient
     response
   end
   
-  def report_runs(report_id)
+  def report_runs(report_id, query = {})
     url = report_runs_url(report_id)
-    log_request(url)
-    response = self.class.get(url, @options)
+    log_request(url, query)
+    response = self.class.get(url, request_options(query))
     log_response(response, url)
     response
   end
@@ -61,8 +61,13 @@ class GumshoeClient
   
   private
   
-  def log_request(url)
-    @curl_command = GumshoeApiUrls.curl_command(url)
+  def request_options(query = {})
+    cleaned_query = query.reject { |_key, value| value.blank? }
+    cleaned_query.any? ? @options.merge(query: cleaned_query) : @options
+  end
+
+  def log_request(url, query = {})
+    @curl_command = GumshoeApiUrls.curl_command(url, query)
   end
   
   def log_response(response, url)

@@ -65,5 +65,11 @@
               = link_to "Raw", raw_report_run_path(report_id: @report_id, ordinal: ordinal), class: "btn btn-secondary", style: "margin-left: 5px;"
             - else
               N/A
+  - if @prev_token || @next_token
+    .pagination{style: "margin-top: 20px;"}
+      - if @prev_token
+        = link_to "Previous", report_runs_path(report_id: @report_id, **request.query_parameters.merge(token: @prev_token).symbolize_keys), class: "btn btn-secondary"
+      - if @next_token
+        = link_to "Next", report_runs_path(report_id: @report_id, **request.query_parameters.merge(token: @next_token).symbolize_keys), class: "btn btn-secondary", style: "margin-left: 5px;"
 - else
   %p No report runs found.

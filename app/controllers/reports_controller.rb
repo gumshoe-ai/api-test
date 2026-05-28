@@ -12,11 +12,12 @@ class ReportsController < ApplicationController
       @curl_command = curl_command(reports_url)
       
       client = GumshoeClient.new(api_key)
-      response = client.reports
+      response = client.reports(gumshoe_pagination_params)
       @curl_command = client.curl_command
       
       if response.success?
         parsed = response.parsed_response
+        set_gumshoe_pagination(parsed)
         # Handle nested structure: {"data": [...]}, {"reports": [...]} or direct array
         @reports = if parsed.is_a?(Hash) && parsed['data']
           parsed['data']

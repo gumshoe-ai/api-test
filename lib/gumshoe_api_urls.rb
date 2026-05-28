@@ -1,16 +1,12 @@
+require "uri"
+
 module GumshoeApiUrls
   API_VERSION = 'v1'
   
   module_function
   
   def base_uri
-    @base_uri ||= begin
-      if defined?(Rails) && Rails.application.credentials.gumshoe&.dig(:api_url)
-        Rails.application.credentials.gumshoe[:api_url]
-      else
-        'https://app.gumshoe.ai' # fallback default
-      end
-    end
+    @base_uri ||= ENV.fetch("GUMSHOE_API_URL", "https://app.gumshoe.ai")
   end
   
   def reports_url
@@ -33,12 +29,16 @@ module GumshoeApiUrls
     "/#{API_VERSION}/reports/#{report_id}/runs/#{ordinal}/raw"
   end
   
-  def full_url(path)
-    "#{base_uri}#{path}"
+  def full_url(path, query = {})
+    url = "#{base_uri}#{path}"
+    cleaned_query = query.reject { |_key, value| value.blank? }
+    return url if cleaned_query.empty?
+
+    "#{url}?#{URI.encode_www_form(cleaned_query)}"
   end
   
-  def curl_command(path)
-    full = full_url(path)
+  def curl_command(path, query = {})
+    full = full_url(path, query)
     "curl -X GET '#{full}' -H 'Authorization: Bearer <GUMSHOE_API_KEY>' -H 'Content-Type: application/json' -v"
   end
 end

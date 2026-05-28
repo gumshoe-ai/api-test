@@ -76,5 +76,11 @@
               = link_to "View", report_path(report_id), class: "btn btn-primary"
             - else
               N/A
+  - if @prev_token || @next_token
+    .pagination{style: "margin-top: 20px;"}
+      - if @prev_token
+        = link_to "Previous", reports_path(request.query_parameters.merge(token: @prev_token)), class: "btn btn-secondary"
+      - if @next_token
+        = link_to "Next", reports_path(request.query_parameters.merge(token: @next_token)), class: "btn btn-secondary", style: "margin-left: 5px;"
 - else
   %p No reports found.
