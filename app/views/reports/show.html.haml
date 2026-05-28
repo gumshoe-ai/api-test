@@ -1,0 +1,66 @@
+- if @error
+  .alert.alert-danger
+    %strong Error:
+    = @error
+- else
+  = link_to "← Back to Reports", reports_path, class: "btn btn-secondary"
+  %h1 Report Details
+  
+  - if @curl_command
+    .debug-info{style: "background: #f0f0f0; padding: 15px; margin: 20px 0; border-radius: 4px; font-family: monospace; font-size: 12px;"}
+      %strong CURL Command to test API:
+      %br
+      %code{style: "background: #fff; padding: 10px; display: block; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; word-break: break-all;"}
+        = @curl_command
+  
+  - if @report
+    .report-details
+      %h2 Report Information
+      %dl
+        - @report.each do |key, value|
+          - next if key.to_s == 'runs' # Skip runs, we'll show them separately
+          %dt= key.to_s.humanize
+          %dd
+            - if value.is_a?(Hash) || value.is_a?(Array)
+              %pre= JSON.pretty_generate(value)
+            - else
+              = value
+    
+    - if @runs && @runs.any?
+      %h2 Report Runs (#{@runs.count})
+      %table.table
+        %thead
+          %tr
+            %th ID
+            %th Ordinal
+            %th Status
+            %th Created At
+            %th Actions
+        %tbody
+          - @runs.each do |run|
+            %tr
+              %td= run['id'] || run[:id] || 'N/A'
+              %td= run['ordinal'] || run[:ordinal] || 'N/A'
+              %td
+                - status = run['status'] || run[:status]
+                %span.status{class: status&.downcase}
+                  = status&.capitalize || 'N/A'
+              %td
+                - created_at = run['createdAt'] || run['created_at'] || run[:created_at]
+                - if created_at
+                  = Time.parse(created_at).strftime("%Y-%m-%d %H:%M") rescue created_at
+                - else
+                  N/A
+              %td
+                - ordinal = run['ordinal'] || run[:ordinal]
+                - report_id = params[:id]
+                - if ordinal && report_id
+                  = link_to "View", report_run_path(report_id: report_id, ordinal: ordinal), class: "btn btn-primary"
+                  = link_to "Raw", raw_report_run_path(report_id: report_id, ordinal: ordinal), class: "btn btn-secondary", style: "margin-left: 5px;"
+                - else
+                  N/A
+    - else
+      %p No runs found for this report.
+  - else
+    %p Report not found.
+

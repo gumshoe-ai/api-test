@@ -1,0 +1,75 @@
+= link_to "← Back to Report", report_path(@report_id), class: "btn btn-secondary"
+%h1 Report Runs for Report ##{@report_id}
+
+- if @error
+  .alert.alert-danger
+    %strong Error:
+    = @error
+    %br
+    %br
+    - if @error.include?("Credentials not available") || @error.include?("Gumshoe credentials not found")
+      %strong To fix this:
+      %br
+      1. Provide the Rails master key via
+      %code RAILS_MASTER_KEY
+      or a local
+      %code config/master.key
+      file.
+      %br
+      2. Or edit credentials:
+      %code EDITOR='nano' bin/rails credentials:edit
+      %br
+      %br
+    %small Check the Rails logs for detailed API request/response information
+
+- if @curl_command
+  .debug-info{style: "background: #f0f0f0; padding: 15px; margin: 20px 0; border-radius: 4px; font-family: monospace; font-size: 12px;"}
+    %strong CURL Command to test API:
+    %br
+    %code{style: "background: #fff; padding: 10px; display: block; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; word-break: break-all;"}
+      = @curl_command
+
+- if @report_runs && @report_runs.any?
+  %table.table
+    %thead
+      %tr
+        %th Ordinal
+        %th Status
+        %th Created At
+        %th Updated At
+        %th Actions
+    %tbody
+      - @report_runs.each do |report_run|
+        %tr
+          %td= report_run['ordinal'] || report_run[:ordinal] || report_run['id'] || report_run[:id]
+          %td
+            - status = report_run['status'] || report_run[:status]
+            %span.status{class: status&.downcase}
+              = status&.capitalize || 'N/A'
+          %td
+            - created_at = report_run['createdAt'] || report_run['created_at'] || report_run[:created_at]
+            - if created_at
+              = Time.parse(created_at).strftime("%Y-%m-%d %H:%M") rescue created_at
+            - else
+              N/A
+          %td
+            - updated_at = report_run['updatedAt'] || report_run['updated_at'] || report_run[:updated_at]
+            - if updated_at
+              = Time.parse(updated_at).strftime("%Y-%m-%d %H:%M") rescue updated_at
+            - else
+              N/A
+          %td
+            - ordinal = report_run['ordinal'] || report_run[:ordinal] || report_run['id'] || report_run[:id]
+            - if ordinal && @report_id
+              = link_to "View", report_run_path(report_id: @report_id, ordinal: ordinal), class: "btn btn-primary"
+              = link_to "Raw", raw_report_run_path(report_id: @report_id, ordinal: ordinal), class: "btn btn-secondary", style: "margin-left: 5px;"
+            - else
+              N/A
+  - if @prev_token || @next_token
+    .pagination{style: "margin-top: 20px;"}
+      - if @prev_token
+        = link_to "Previous", report_runs_path(report_id: @report_id, **request.query_parameters.merge(token: @prev_token).symbolize_keys), class: "btn btn-secondary"
+      - if @next_token
+        = link_to "Next", report_runs_path(report_id: @report_id, **request.query_parameters.merge(token: @next_token).symbolize_keys), class: "btn btn-secondary", style: "margin-left: 5px;"
+- else
+  %p No report runs found.

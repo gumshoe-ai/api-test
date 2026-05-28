@@ -1,0 +1,86 @@
+%h1 Reports
+
+- if @error
+  .alert.alert-danger
+    %strong Error:
+    = @error
+    %br
+    %br
+    - if @error.include?("Credentials not available") || @error.include?("Gumshoe credentials not found")
+      %strong To fix this:
+      %br
+      1. Provide the Rails master key via
+      %code RAILS_MASTER_KEY
+      or a local
+      %code config/master.key
+      file.
+      %br
+      2. Or edit credentials:
+      %code EDITOR='nano' bin/rails credentials:edit
+      %br
+      %br
+    %small Check the Rails logs for detailed API request/response information
+
+- if @curl_command
+  .debug-info{style: "background: #f0f0f0; padding: 15px; margin: 20px 0; border-radius: 4px; font-family: monospace; font-size: 12px;"}
+    %strong CURL Command to test API:
+    %br
+    %code{style: "background: #fff; padding: 10px; display: block; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; word-break: break-all;"}
+      = @curl_command
+
+- if @reports && @reports.any?
+  %table.table
+    %thead
+      %tr
+        %th ID
+        %th Title
+        %th Brand
+        %th Status
+        %th Organization
+        %th Geo
+        %th Created At
+        %th Actions
+    %tbody
+      - @reports.each do |report|
+        %tr
+          %td= report['id'] || report[:id] || 'N/A'
+          %td
+            - title = report['title'] || report[:title]
+            = title || 'N/A'
+          %td
+            - brand = report['brand'] || report[:brand]
+            - if brand
+              = brand['name'] || brand[:name] || 'N/A'
+            - else
+              N/A
+          %td
+            - status = report['status'] || report[:status]
+            %span.status{class: status&.downcase}
+              = status&.capitalize || 'N/A'
+          %td
+            - org = report['organization'] || report[:organization]
+            - if org
+              = org['title'] || org[:title] || 'N/A'
+            - else
+              N/A
+          %td= report['geo'] || report[:geo] || 'N/A'
+          %td
+            - created_at = report['createdAt'] || report[:created_at]
+            - if created_at
+              = Time.parse(created_at).strftime("%Y-%m-%d %H:%M") rescue created_at
+            - else
+              N/A
+          %td
+            - report_id = report['id'] || report[:id]
+            - if report_id
+              = link_to "View", report_path(report_id), class: "btn btn-primary"
+            - else
+              N/A
+  - if @prev_token || @next_token
+    .pagination{style: "margin-top: 20px;"}
+      - if @prev_token
+        = link_to "Previous", reports_path(request.query_parameters.merge(token: @prev_token)), class: "btn btn-secondary"
+      - if @next_token
+        = link_to "Next", reports_path(request.query_parameters.merge(token: @next_token)), class: "btn btn-secondary", style: "margin-left: 5px;"
+- else
+  %p No reports found.

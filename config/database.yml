@@ -1,0 +1,20 @@
+# Minimal database configuration - app doesn't require a database
+# Using SQLite in-memory database to satisfy Rails requirements
+
+default: &default
+  adapter: sqlite3
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  timeout: 5000
+
+development:
+  <<: *default
+  database: ":memory:"
+
+test:
+  <<: *default
+  database: ":memory:"
+
+production:
+  <<: *default
+  database: ":memory:"
+
