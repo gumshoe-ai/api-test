@@ -3,7 +3,6 @@
 The credentials file needs to be created using Rails' built-in command. Run this in your terminal:
 
 ```bash
-cd /Users/patricko/projects/gumshoeapi
 EDITOR="nano" bin/rails credentials:edit
 ```
 
